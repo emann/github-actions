@@ -1,0 +1,43 @@
+name: Run Checks
+inputs:
+  module:
+    description: The name of the module to run the checks on
+    required: true
+  additional-modules-to-lint:
+    description: Additional modules to be linted using the standard ruleset (i.e. not the ones used for linting unit tests).
+    required: false
+    default: ""
+  test-dir:
+    description: The directory (or path from the project root) containing the pytests to run. Defaults to "tests".
+    required: false
+    default: tests
+  skip-coverage-check:
+    description: Set to true to disable enforcement of 100% code coverage.
+    required: false
+    default: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run ruff (formatting + linting)
+      shell: bash
+      run: |
+        poetry run ruff format . --check
+        poetry run ruff check . --no-fix
+
+    - name: Run safety
+      shell: bash
+      run: poetry export -f requirements.txt | poetry run safety check --bare --stdin
+
+    - name: Run mypy
+      shell: bash
+      run: poetry run mypy --show-error-codes ${{ inputs.module }}
+      
+    - name: Run pytest
+      shell: bash
+      run: poetry run pytest --cov=${{ inputs.module }} --cov-report=term-missing ${{ inputs.test-dir }}
+
+    - name: Enforce 100% Test Coverage
+      if: ${{ inputs.skip-coverage-check == 'false' }}
+      shell: bash
+      run: poetry run coverage report --fail-under=100

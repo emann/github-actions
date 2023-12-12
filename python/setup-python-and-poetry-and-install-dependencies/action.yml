@@ -1,0 +1,60 @@
+name: Install Poetry and Dependencies
+description: Installs/configures poetry and then installs the python dependencies.
+inputs:
+  poetry-version:
+    description: The version of poetry to install
+    required: false
+    default: "1.4.1"
+  private-package-repo-url:
+    description: The url of the private package repository you want to add to poetry. You must also specify `private-package-repo-username`
+    required: false
+    default: ""
+  private-package-repo-username:
+    description: The username for the private package repository you want to add to poetry
+    required: false
+    default: ""
+  private-package-repo-password:
+    description: The password for the private package repository you want to add to poetry
+    required: false
+    default: ""
+  dependency-hash-version:
+    description: A quick way to generate a completely new cache if something goes awry and loading from partial cache keys is causing issues.
+    required: false
+    default: "v1"
+  exclude-dev-dependencies:
+    description: If set to true, poetry install will be called with the --no-dev
+    required: false
+    default: "false"
+  extras:
+    description: Extras to include when installing this package
+    required: false
+    default: NOT_SPECIFIED
+  working-directory:
+    description: The working directory where this action should run. Defaults to the root of the git repository.
+    required: false
+    default: "."
+  python-version:
+    description: The version of python to install/use
+    required: false
+    default: "3.8"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Dependencies with Poetry
+      uses: emann/github-actions/python/install-dependencies-with-poetry@v1
+      with:
+        poetry-version:  ${{inputs.poetry-version}}
+        private-package-repo-url: ${{inputs.private-package-repo-url}}
+        private-package-repo-username: ${{inputs.private-package-repo-username}}
+        private-package-repo-password: ${{inputs.private-package-repo-password}}
+        working-directory: ${{inputs.working-directory}}
+        dependency-hash-version: ${{inputs.dependency-hash-version}}
+        exclude-dev-dependencies: ${{inputs.exclude-dev-dependencies}}
+        extras: ${{inputs.extras}}
+

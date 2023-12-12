@@ -1,2 +1,2 @@
 # github-actions
-Reusable github actions/workflows I use in my projects
+A collection of reusable actions/workflows used in my projects
